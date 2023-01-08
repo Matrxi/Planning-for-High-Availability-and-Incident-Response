@@ -1,0 +1,2247 @@
+matrxi@ubuntu:~/Documents/Planning-for-High-Availability-and-Incident-Response/project/starter-code/zone2$ terraform apply
+data.terraform_remote_state.vpc: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_assume_role_policy: Reading...
+data.aws_iam_role.eks_cluster_role: Reading...
+data.aws_ami.amazon_linux_2: Reading...
+data.aws_iam_policy.cloudwatch-policy: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_assume_role_policy: Read complete after 0s [id=189502314]
+data.aws_caller_identity.current: Reading...
+data.aws_iam_policy.instance-policy: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_node_assume_role_policy: Reading...
+data.aws_iam_role.eks_node_role: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_node_assume_role_policy: Read complete after 0s [id=1903849331]
+data.aws_iam_role.eks_node_role: Read complete after 1s [id=app-udacity-eks-node-role]
+data.aws_iam_role.eks_cluster_role: Read complete after 1s [id=app-udacity-eks-cluster-role]
+data.aws_caller_identity.current: Read complete after 1s [id=586543333908]
+data.aws_ami.amazon_linux_2: Read complete after 2s [id=ami-0fc161d91b03576d0]
+data.terraform_remote_state.vpc: Read complete after 5s
+data.aws_iam_policy.cloudwatch-policy: Still reading... [10s elapsed]
+data.aws_iam_policy.instance-policy: Still reading... [10s elapsed]
+data.aws_iam_policy.instance-policy: Read complete after 11s [id=arn:aws:iam::586543333908:policy/app-udacity-instance-policy]
+data.aws_iam_policy.cloudwatch-policy: Read complete after 11s [id=arn:aws:iam::586543333908:policy/app-udacity-eks-cluster-role-cloudwatch-policy]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+ <= read (data resources)
+
+Terraform will perform the following actions:
+
+  # data.aws_eks_cluster.cluster will be read during apply
+  # (config refers to values not yet known)
+ <= data "aws_eks_cluster" "cluster" {
+      + arn                       = (known after apply)
+      + certificate_authority     = (known after apply)
+      + cluster_id                = (known after apply)
+      + created_at                = (known after apply)
+      + enabled_cluster_log_types = (known after apply)
+      + endpoint                  = (known after apply)
+      + id                        = (known after apply)
+      + identity                  = (known after apply)
+      + kubernetes_network_config = (known after apply)
+      + name                      = (known after apply)
+      + outpost_config            = (known after apply)
+      + platform_version          = (known after apply)
+      + role_arn                  = (known after apply)
+      + status                    = (known after apply)
+      + tags                      = (known after apply)
+      + version                   = (known after apply)
+      + vpc_config                = (known after apply)
+    }
+
+  # data.aws_eks_cluster_auth.cluster will be read during apply
+  # (config refers to values not yet known)
+ <= data "aws_eks_cluster_auth" "cluster" {
+      + id    = (known after apply)
+      + name  = (known after apply)
+      + token = (sensitive value)
+    }
+
+  # kubernetes_namespace.monitoring will be created
+  + resource "kubernetes_namespace" "monitoring" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "monitoring"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+    }
+
+  # kubernetes_namespace.udacity will be created
+  + resource "kubernetes_namespace" "udacity" {
+      + id = (known after apply)
+
+      + metadata {
+          + generation       = (known after apply)
+          + name             = "udacity"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+    }
+
+  # kubernetes_service.grafana-external will be created
+  + resource "kubernetes_service" "grafana-external" {
+      + id                     = (known after apply)
+      + status                 = (known after apply)
+      + wait_for_load_balancer = true
+
+      + metadata {
+          + annotations      = {
+              + "service.beta.kubernetes.io/aws-load-balancer-nlb-target-type" = "ip"
+              + "service.beta.kubernetes.io/aws-load-balancer-type"            = "nlb"
+            }
+          + generation       = (known after apply)
+          + name             = "grafana-external"
+          + namespace        = "monitoring"
+          + resource_version = (known after apply)
+          + uid              = (known after apply)
+        }
+
+      + spec {
+          + allocate_load_balancer_node_ports = true
+          + cluster_ip                        = (known after apply)
+          + cluster_ips                       = (known after apply)
+          + external_traffic_policy           = (known after apply)
+          + health_check_node_port            = (known after apply)
+          + internal_traffic_policy           = (known after apply)
+          + ip_families                       = (known after apply)
+          + ip_family_policy                  = (known after apply)
+          + publish_not_ready_addresses       = false
+          + selector                          = {
+              + "app.kubernetes.io/name" = "grafana"
+            }
+          + session_affinity                  = "None"
+          + type                              = "LoadBalancer"
+
+          + port {
+              + node_port   = (known after apply)
+              + port        = 80
+              + protocol    = "TCP"
+              + target_port = "3000"
+            }
+
+          + session_affinity_config {
+              + client_ip {
+                  + timeout_seconds = (known after apply)
+                }
+            }
+        }
+    }
+
+  # module.project_alb.aws_lb.udacity will be created
+  + resource "aws_lb" "udacity" {
+      + arn                        = (known after apply)
+      + arn_suffix                 = (known after apply)
+      + desync_mitigation_mode     = "defensive"
+      + dns_name                   = (known after apply)
+      + drop_invalid_header_fields = false
+      + enable_deletion_protection = false
+      + enable_http2               = true
+      + enable_waf_fail_open       = false
+      + id                         = (known after apply)
+      + idle_timeout               = 60
+      + internal                   = false
+      + ip_address_type            = (known after apply)
+      + load_balancer_type         = "application"
+      + name                       = "udacity-lb-tf"
+      + preserve_host_header       = false
+      + security_groups            = (known after apply)
+      + subnets                    = [
+          + "subnet-0ab8918fde193be27",
+          + "subnet-0e5a8d0abc8bc7054",
+        ]
+      + tags_all                   = {
+          + "Name"      = "udacity"
+          + "Terraform" = "true"
+        }
+      + vpc_id                     = (known after apply)
+      + zone_id                    = (known after apply)
+
+      + subnet_mapping {
+          + allocation_id        = (known after apply)
+          + ipv6_address         = (known after apply)
+          + outpost_id           = (known after apply)
+          + private_ipv4_address = (known after apply)
+          + subnet_id            = (known after apply)
+        }
+    }
+
+  # module.project_alb.aws_lb_listener.udacity will be created
+  + resource "aws_lb_listener" "udacity" {
+      + arn               = (known after apply)
+      + id                = (known after apply)
+      + load_balancer_arn = (known after apply)
+      + port              = 80
+      + protocol          = "HTTP"
+      + ssl_policy        = (known after apply)
+      + tags_all          = {
+          + "Name"      = "udacity"
+          + "Terraform" = "true"
+        }
+
+      + default_action {
+          + order            = (known after apply)
+          + target_group_arn = (known after apply)
+          + type             = "forward"
+        }
+    }
+
+  # module.project_alb.aws_lb_target_group.udacity will be created
+  + resource "aws_lb_target_group" "udacity" {
+      + arn                                = (known after apply)
+      + arn_suffix                         = (known after apply)
+      + connection_termination             = false
+      + deregistration_delay               = "300"
+      + id                                 = (known after apply)
+      + ip_address_type                    = (known after apply)
+      + lambda_multi_value_headers_enabled = false
+      + load_balancing_algorithm_type      = (known after apply)
+      + name                               = "udacity-lb-tg"
+      + port                               = 80
+      + preserve_client_ip                 = (known after apply)
+      + protocol                           = "HTTP"
+      + protocol_version                   = (known after apply)
+      + proxy_protocol_v2                  = false
+      + slow_start                         = 0
+      + tags_all                           = {
+          + "Name"      = "udacity"
+          + "Terraform" = "true"
+        }
+      + target_type                        = "instance"
+      + vpc_id                             = "vpc-03dc4d37843bbc6d3"
+
+      + health_check {
+          + enabled             = (known after apply)
+          + healthy_threshold   = (known after apply)
+          + interval            = (known after apply)
+          + matcher             = (known after apply)
+          + path                = (known after apply)
+          + port                = (known after apply)
+          + protocol            = (known after apply)
+          + timeout             = (known after apply)
+          + unhealthy_threshold = (known after apply)
+        }
+
+      + stickiness {
+          + cookie_duration = (known after apply)
+          + cookie_name     = (known after apply)
+          + enabled         = (known after apply)
+          + type            = (known after apply)
+        }
+
+      + target_failover {
+          + on_deregistration = (known after apply)
+          + on_unhealthy      = (known after apply)
+        }
+    }
+
+  # module.project_alb.aws_lb_target_group_attachment.udacity[0] will be created
+  + resource "aws_lb_target_group_attachment" "udacity" {
+      + id               = (known after apply)
+      + port             = 80
+      + target_group_arn = (known after apply)
+      + target_id        = (known after apply)
+    }
+
+  # module.project_alb.aws_lb_target_group_attachment.udacity[1] will be created
+  + resource "aws_lb_target_group_attachment" "udacity" {
+      + id               = (known after apply)
+      + port             = 80
+      + target_group_arn = (known after apply)
+      + target_id        = (known after apply)
+    }
+
+  # module.project_alb.aws_lb_target_group_attachment.udacity[2] will be created
+  + resource "aws_lb_target_group_attachment" "udacity" {
+      + id               = (known after apply)
+      + port             = 80
+      + target_group_arn = (known after apply)
+      + target_id        = (known after apply)
+    }
+
+  # module.project_ec2.aws_instance.ubuntu[0] will be created
+  + resource "aws_instance" "ubuntu" {
+      + ami                                  = "ami-025a4679e58037845"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = (known after apply)
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t3.micro"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "udacity"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + subnet_id                            = "subnet-0ab8918fde193be27"
+      + tags                                 = {
+          + "Name" = "Ubuntu-Web"
+        }
+      + tags_all                             = {
+          + "Name"      = "Ubuntu-Web"
+          + "Terraform" = "true"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification {
+          + capacity_reservation_preference = (known after apply)
+
+          + capacity_reservation_target {
+              + capacity_reservation_id                 = (known after apply)
+              + capacity_reservation_resource_group_arn = (known after apply)
+            }
+        }
+
+      + ebs_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + snapshot_id           = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+
+      + enclave_options {
+          + enabled = (known after apply)
+        }
+
+      + ephemeral_block_device {
+          + device_name  = (known after apply)
+          + no_device    = (known after apply)
+          + virtual_name = (known after apply)
+        }
+
+      + maintenance_options {
+          + auto_recovery = (known after apply)
+        }
+
+      + metadata_options {
+          + http_endpoint               = (known after apply)
+          + http_put_response_hop_limit = (known after apply)
+          + http_tokens                 = (known after apply)
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface {
+          + delete_on_termination = (known after apply)
+          + device_index          = (known after apply)
+          + network_card_index    = (known after apply)
+          + network_interface_id  = (known after apply)
+        }
+
+      + private_dns_name_options {
+          + enable_resource_name_dns_a_record    = (known after apply)
+          + enable_resource_name_dns_aaaa_record = (known after apply)
+          + hostname_type                        = (known after apply)
+        }
+
+      + root_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+    }
+
+  # module.project_ec2.aws_instance.ubuntu[1] will be created
+  + resource "aws_instance" "ubuntu" {
+      + ami                                  = "ami-025a4679e58037845"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = (known after apply)
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t3.micro"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "udacity"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + subnet_id                            = "subnet-0ab8918fde193be27"
+      + tags                                 = {
+          + "Name" = "Ubuntu-Web"
+        }
+      + tags_all                             = {
+          + "Name"      = "Ubuntu-Web"
+          + "Terraform" = "true"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification {
+          + capacity_reservation_preference = (known after apply)
+
+          + capacity_reservation_target {
+              + capacity_reservation_id                 = (known after apply)
+              + capacity_reservation_resource_group_arn = (known after apply)
+            }
+        }
+
+      + ebs_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + snapshot_id           = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+
+      + enclave_options {
+          + enabled = (known after apply)
+        }
+
+      + ephemeral_block_device {
+          + device_name  = (known after apply)
+          + no_device    = (known after apply)
+          + virtual_name = (known after apply)
+        }
+
+      + maintenance_options {
+          + auto_recovery = (known after apply)
+        }
+
+      + metadata_options {
+          + http_endpoint               = (known after apply)
+          + http_put_response_hop_limit = (known after apply)
+          + http_tokens                 = (known after apply)
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface {
+          + delete_on_termination = (known after apply)
+          + device_index          = (known after apply)
+          + network_card_index    = (known after apply)
+          + network_interface_id  = (known after apply)
+        }
+
+      + private_dns_name_options {
+          + enable_resource_name_dns_a_record    = (known after apply)
+          + enable_resource_name_dns_aaaa_record = (known after apply)
+          + hostname_type                        = (known after apply)
+        }
+
+      + root_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+    }
+
+  # module.project_ec2.aws_instance.ubuntu[2] will be created
+  + resource "aws_instance" "ubuntu" {
+      + ami                                  = "ami-025a4679e58037845"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = (known after apply)
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t3.micro"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "udacity"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + subnet_id                            = "subnet-0ab8918fde193be27"
+      + tags                                 = {
+          + "Name" = "Ubuntu-Web"
+        }
+      + tags_all                             = {
+          + "Name"      = "Ubuntu-Web"
+          + "Terraform" = "true"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + vpc_security_group_ids               = (known after apply)
+
+      + capacity_reservation_specification {
+          + capacity_reservation_preference = (known after apply)
+
+          + capacity_reservation_target {
+              + capacity_reservation_id                 = (known after apply)
+              + capacity_reservation_resource_group_arn = (known after apply)
+            }
+        }
+
+      + ebs_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + snapshot_id           = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+
+      + enclave_options {
+          + enabled = (known after apply)
+        }
+
+      + ephemeral_block_device {
+          + device_name  = (known after apply)
+          + no_device    = (known after apply)
+          + virtual_name = (known after apply)
+        }
+
+      + maintenance_options {
+          + auto_recovery = (known after apply)
+        }
+
+      + metadata_options {
+          + http_endpoint               = (known after apply)
+          + http_put_response_hop_limit = (known after apply)
+          + http_tokens                 = (known after apply)
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface {
+          + delete_on_termination = (known after apply)
+          + device_index          = (known after apply)
+          + network_card_index    = (known after apply)
+          + network_interface_id  = (known after apply)
+        }
+
+      + private_dns_name_options {
+          + enable_resource_name_dns_a_record    = (known after apply)
+          + enable_resource_name_dns_aaaa_record = (known after apply)
+          + hostname_type                        = (known after apply)
+        }
+
+      + root_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+    }
+
+  # module.project_ec2.aws_security_group.ec2_sg will be created
+  + resource "aws_security_group" "ec2_sg" {
+      + arn                    = (known after apply)
+      + description            = "Managed by Terraform"
+      + egress                 = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = ""
+              + from_port        = 0
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "-1"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 0
+            },
+        ]
+      + id                     = (known after apply)
+      + ingress                = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = "monitoring"
+              + from_port        = 9100
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "tcp"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 9100
+            },
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = "ssh port"
+              + from_port        = 22
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "tcp"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 22
+            },
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = "web port"
+              + from_port        = 80
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "tcp"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 80
+            },
+        ]
+      + name                   = "ec2_sg"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "ec2_sg"
+        }
+      + tags_all               = {
+          + "Name"      = "ec2_sg"
+          + "Terraform" = "true"
+        }
+      + vpc_id                 = "vpc-03dc4d37843bbc6d3"
+    }
+
+  # module.project_eks.aws_eks_cluster.cluster will be created
+  + resource "aws_eks_cluster" "cluster" {
+      + arn                   = (known after apply)
+      + certificate_authority = (known after apply)
+      + cluster_id            = (known after apply)
+      + created_at            = (known after apply)
+      + endpoint              = (known after apply)
+      + id                    = (known after apply)
+      + identity              = (known after apply)
+      + name                  = "udacity-cluster"
+      + platform_version      = (known after apply)
+      + role_arn              = "arn:aws:iam::586543333908:role/app-udacity-eks-cluster-role"
+      + status                = (known after apply)
+      + tags_all              = {
+          + "Name"      = "udacity"
+          + "Terraform" = "true"
+        }
+      + version               = "1.21"
+
+      + kubernetes_network_config {
+          + ip_family         = (known after apply)
+          + service_ipv4_cidr = (known after apply)
+          + service_ipv6_cidr = (known after apply)
+        }
+
+      + vpc_config {
+          + cluster_security_group_id = (known after apply)
+          + endpoint_private_access   = false
+          + endpoint_public_access    = true
+          + public_access_cidrs       = (known after apply)
+          + security_group_ids        = (known after apply)
+          + subnet_ids                = [
+              + "subnet-00d6ee3c843916c40",
+              + "subnet-0fdf60f8a90024e9e",
+            ]
+          + vpc_id                    = (known after apply)
+        }
+    }
+
+  # module.project_eks.aws_eks_node_group.node will be created
+  + resource "aws_eks_node_group" "node" {
+      + ami_type               = (known after apply)
+      + arn                    = (known after apply)
+      + capacity_type          = (known after apply)
+      + cluster_name           = "udacity-cluster"
+      + disk_size              = (known after apply)
+      + id                     = (known after apply)
+      + instance_types         = [
+          + "t3.medium",
+        ]
+      + node_group_name        = "app-udacity-node-group"
+      + node_group_name_prefix = (known after apply)
+      + node_role_arn          = "arn:aws:iam::586543333908:role/app-udacity-eks-node-role"
+      + release_version        = (known after apply)
+      + resources              = (known after apply)
+      + status                 = (known after apply)
+      + subnet_ids             = [
+          + "subnet-00d6ee3c843916c40",
+          + "subnet-0fdf60f8a90024e9e",
+        ]
+      + tags                   = {
+          + "Name" = "eks-udacity-nodes"
+        }
+      + tags_all               = {
+          + "Name"      = "eks-udacity-nodes"
+          + "Terraform" = "true"
+        }
+      + version                = (known after apply)
+
+      + scaling_config {
+          + desired_size = 2
+          + max_size     = 2
+          + min_size     = 2
+        }
+
+      + update_config {
+          + max_unavailable            = (known after apply)
+          + max_unavailable_percentage = (known after apply)
+        }
+    }
+
+  # module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSCloudwatchPolicy will be created
+  + resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSCloudwatchPolicy" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::586543333908:policy/app-udacity-eks-cluster-role-cloudwatch-policy"
+      + role       = "app-udacity-eks-node-role"
+    }
+
+  # module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy will be created
+  + resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSClusterPolicy" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"
+      + role       = "app-udacity-eks-cluster-role"
+    }
+
+  # module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSServicePolicy will be created
+  + resource "aws_iam_role_policy_attachment" "cluster_AmazonEKSServicePolicy" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonEKSServicePolicy"
+      + role       = "app-udacity-eks-cluster-role"
+    }
+
+  # module.project_eks.aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly will be created
+  + resource "aws_iam_role_policy_attachment" "node_AmazonEC2ContainerRegistryReadOnly" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
+      + role       = "app-udacity-eks-node-role"
+    }
+
+  # module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy will be created
+  + resource "aws_iam_role_policy_attachment" "node_AmazonEKSWorkerNodePolicy" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy"
+      + role       = "app-udacity-eks-node-role"
+    }
+
+  # module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy will be created
+  + resource "aws_iam_role_policy_attachment" "node_AmazonEKS_CNI_Policy" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy"
+      + role       = "app-udacity-eks-node-role"
+    }
+
+  # module.project_eks.aws_iam_role_policy_attachment.node_CloudWatchAgentServerPolicy will be created
+  + resource "aws_iam_role_policy_attachment" "node_CloudWatchAgentServerPolicy" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::aws:policy/CloudWatchAgentServerPolicy"
+      + role       = "app-udacity-eks-node-role"
+    }
+
+  # module.project_eks.aws_iam_role_policy_attachment.node_harmony_policy_attachment will be created
+  + resource "aws_iam_role_policy_attachment" "node_harmony_policy_attachment" {
+      + id         = (known after apply)
+      + policy_arn = "arn:aws:iam::586543333908:policy/app-udacity-instance-policy"
+      + role       = "app-udacity-eks-node-role"
+    }
+
+  # module.project_eks.aws_security_group.eks-cluster will be created
+  + resource "aws_security_group" "eks-cluster" {
+      + arn                    = (known after apply)
+      + description            = "Managed by Terraform"
+      + egress                 = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = ""
+              + from_port        = 0
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "-1"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 0
+            },
+        ]
+      + id                     = (known after apply)
+      + ingress                = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + description      = ""
+              + from_port        = 0
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "-1"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 0
+            },
+        ]
+      + name                   = "SG-eks-cluster"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags_all               = {
+          + "Name"      = "udacity"
+          + "Terraform" = "true"
+        }
+      + vpc_id                 = "vpc-03dc4d37843bbc6d3"
+    }
+
+Plan: 24 to add, 0 to change, 0 to destroy.
+
+Changes to Outputs:
+  + account_id  = "586543333908"
+  + caller_arn  = "arn:aws:iam::586543333908:user/matrxi"
+  + caller_user = "AIDAYREFVAIKEMTLJAQAK"
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSCloudwatchPolicy: Creating...
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy: Creating...
+module.project_eks.aws_iam_role_policy_attachment.node_CloudWatchAgentServerPolicy: Creating...
+module.project_eks.aws_security_group.eks-cluster: Creating...
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly: Creating...
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy: Creating...
+module.project_eks.aws_iam_role_policy_attachment.node_harmony_policy_attachment: Creating...
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy: Creating...
+module.project_alb.aws_lb_target_group.udacity: Creating...
+module.project_ec2.aws_security_group.ec2_sg: Creating...
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy: Creation complete after 1s [id=app-udacity-eks-node-role-20230108145322898300000001]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSServicePolicy: Creating...
+module.project_eks.aws_iam_role_policy_attachment.node_harmony_policy_attachment: Creation complete after 1s [id=app-udacity-eks-node-role-20230108145322907500000002]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSCloudwatchPolicy: Creation complete after 1s [id=app-udacity-eks-node-role-20230108145322929600000004]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy: Creation complete after 1s [id=app-udacity-eks-cluster-role-20230108145322928700000003]
+module.project_eks.aws_iam_role_policy_attachment.node_CloudWatchAgentServerPolicy: Creation complete after 1s [id=app-udacity-eks-node-role-20230108145322960300000005]
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy: Creation complete after 1s [id=app-udacity-eks-node-role-20230108145322971200000006]
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly: Creation complete after 1s [id=app-udacity-eks-node-role-20230108145323009800000007]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSServicePolicy: Creation complete after 1s [id=app-udacity-eks-cluster-role-20230108145323512700000008]
+module.project_alb.aws_lb_target_group.udacity: Creation complete after 3s [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3]
+module.project_eks.aws_security_group.eks-cluster: Creation complete after 6s [id=sg-0f275857de95ba384]
+module.project_ec2.aws_security_group.ec2_sg: Creation complete after 6s [id=sg-072eaecba4054431d]
+module.project_eks.aws_eks_cluster.cluster: Creating...
+module.project_ec2.aws_instance.ubuntu[0]: Creating...
+module.project_alb.aws_lb.udacity: Creating...
+module.project_ec2.aws_instance.ubuntu[1]: Creating...
+module.project_ec2.aws_instance.ubuntu[2]: Creating...
+module.project_eks.aws_eks_cluster.cluster: Still creating... [10s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [10s elapsed]
+module.project_ec2.aws_instance.ubuntu[0]: Still creating... [10s elapsed]
+module.project_ec2.aws_instance.ubuntu[1]: Still creating... [10s elapsed]
+module.project_ec2.aws_instance.ubuntu[2]: Still creating... [10s elapsed]
+module.project_ec2.aws_instance.ubuntu[0]: Creation complete after 15s [id=i-03c8df69ae0577b73]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [20s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [20s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [30s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [30s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [40s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [40s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [50s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [50s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [1m0s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [1m0s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [1m10s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [1m10s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [1m20s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [1m20s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [1m30s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [1m30s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [1m40s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [1m40s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [1m50s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [1m50s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [2m0s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [2m0s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [2m10s elapsed]
+module.project_alb.aws_lb.udacity: Still creating... [2m10s elapsed]
+module.project_alb.aws_lb.udacity: Creation complete after 2m15s [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:loadbalancer/app/udacity-lb-tf/808f513cc213f28a]
+module.project_alb.aws_lb_listener.udacity: Creating...
+module.project_alb.aws_lb_listener.udacity: Creation complete after 1s [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:listener/app/udacity-lb-tf/808f513cc213f28a/4bfcfeb42ec18f45]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [2m20s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [2m30s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [2m40s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [2m50s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [3m0s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [3m10s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [3m20s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [3m30s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [3m40s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [3m50s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [4m0s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [4m10s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [4m20s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [4m30s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [4m40s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [4m50s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [5m0s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [5m10s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [5m20s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [5m30s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [5m40s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [5m50s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [6m0s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [6m10s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [6m20s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [6m30s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [6m40s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [6m50s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [7m0s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [7m10s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [7m20s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [7m30s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [7m40s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [7m50s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [8m0s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [8m10s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [8m20s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [8m30s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [8m40s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [8m50s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [9m0s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [9m10s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Still creating... [9m20s elapsed]
+module.project_eks.aws_eks_cluster.cluster: Creation complete after 9m28s [id=udacity-cluster]
+data.aws_eks_cluster.cluster: Reading...
+data.aws_eks_cluster_auth.cluster: Reading...
+data.aws_eks_cluster_auth.cluster: Read complete after 0s [id=udacity-cluster]
+module.project_eks.aws_eks_node_group.node: Creating...
+data.aws_eks_cluster.cluster: Read complete after 0s [id=udacity-cluster]
+module.project_eks.aws_eks_node_group.node: Still creating... [10s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [20s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [30s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [40s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [50s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [1m0s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [1m10s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [1m20s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [1m30s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [1m40s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [1m50s elapsed]
+module.project_eks.aws_eks_node_group.node: Still creating... [2m0s elapsed]
+module.project_eks.aws_eks_node_group.node: Creation complete after 2m2s [id=udacity-cluster:app-udacity-node-group]
+kubernetes_namespace.monitoring: Creating...
+kubernetes_namespace.udacity: Creating...
+kubernetes_namespace.monitoring: Creation complete after 2s [id=monitoring]
+kubernetes_service.grafana-external: Creating...
+kubernetes_namespace.udacity: Creation complete after 3s [id=udacity]
+kubernetes_service.grafana-external: Creation complete after 5s [id=monitoring/grafana-external]
+╷
+│ Error: waiting for EC2 Instance (i-0e9064a109f9fb1fa) create: unexpected state 'shutting-down', wanted target 'running'. last error: Client.UserInitiatedShutdown: User initiated shutdown
+│
+│   with module.project_ec2.aws_instance.ubuntu[1],
+│   on modules/ec2/ec2.tf line 10, in resource "aws_instance" "ubuntu":
+│   10: resource "aws_instance" "ubuntu" {
+│
+╵
+╷
+│ Error: waiting for EC2 Instance (i-07466f570c44896bb) create: unexpected state 'shutting-down', wanted target 'running'. last error: Client.UserInitiatedShutdown: User initiated shutdown
+│
+│   with module.project_ec2.aws_instance.ubuntu[2],
+│   on modules/ec2/ec2.tf line 10, in resource "aws_instance" "ubuntu":
+│   10: resource "aws_instance" "ubuntu" {
+│
+╵
+matrxi@ubuntu:~/Documents/Planning-for-High-Availability-and-Incident-Response/project/starter-code/zone2$ terraform apply
+data.terraform_remote_state.vpc: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_assume_role_policy: Reading...
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322898300000001]
+module.project_eks.data.aws_iam_policy_document.eks_assume_role_policy: Read complete after 0s [id=189502314]
+data.aws_iam_role.eks_cluster_role: Reading...
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322971200000006]
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly: Refreshing state... [id=app-udacity-eks-node-role-20230108145323009800000007]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy: Refreshing state... [id=app-udacity-eks-cluster-role-20230108145322928700000003]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSServicePolicy: Refreshing state... [id=app-udacity-eks-cluster-role-20230108145323512700000008]
+data.aws_iam_role.eks_node_role: Reading...
+data.aws_iam_policy.instance-policy: Reading...
+data.aws_iam_policy.cloudwatch-policy: Reading...
+data.aws_caller_identity.current: Reading...
+module.project_eks.aws_iam_role_policy_attachment.node_CloudWatchAgentServerPolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322960300000005]
+data.aws_iam_role.eks_node_role: Read complete after 1s [id=app-udacity-eks-node-role]
+data.aws_ami.amazon_linux_2: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_node_assume_role_policy: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_node_assume_role_policy: Read complete after 0s [id=1903849331]
+data.aws_iam_role.eks_cluster_role: Read complete after 1s [id=app-udacity-eks-cluster-role]
+data.terraform_remote_state.vpc: Read complete after 4s
+module.project_alb.aws_lb_target_group.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3]
+module.project_eks.aws_security_group.eks-cluster: Refreshing state... [id=sg-0f275857de95ba384]
+module.project_ec2.aws_security_group.ec2_sg: Refreshing state... [id=sg-072eaecba4054431d]
+data.aws_caller_identity.current: Read complete after 1s [id=586543333908]
+data.aws_ami.amazon_linux_2: Read complete after 1s [id=ami-0fc161d91b03576d0]
+module.project_eks.aws_eks_cluster.cluster: Refreshing state... [id=udacity-cluster]
+module.project_ec2.aws_instance.ubuntu[2]: Refreshing state... [id=i-07466f570c44896bb]
+module.project_ec2.aws_instance.ubuntu[1]: Refreshing state... [id=i-0e9064a109f9fb1fa]
+module.project_alb.aws_lb.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:loadbalancer/app/udacity-lb-tf/808f513cc213f28a]
+module.project_ec2.aws_instance.ubuntu[0]: Refreshing state... [id=i-03c8df69ae0577b73]
+data.aws_eks_cluster.cluster: Reading...
+data.aws_eks_cluster_auth.cluster: Reading...
+data.aws_eks_cluster_auth.cluster: Read complete after 0s [id=udacity-cluster]
+module.project_alb.aws_lb_listener.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:listener/app/udacity-lb-tf/808f513cc213f28a/4bfcfeb42ec18f45]
+data.aws_eks_cluster.cluster: Read complete after 0s [id=udacity-cluster]
+data.aws_iam_policy.cloudwatch-policy: Still reading... [10s elapsed]
+data.aws_iam_policy.instance-policy: Still reading... [10s elapsed]
+data.aws_iam_policy.cloudwatch-policy: Read complete after 10s [id=arn:aws:iam::586543333908:policy/app-udacity-eks-cluster-role-cloudwatch-policy]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSCloudwatchPolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322929600000004]
+data.aws_iam_policy.instance-policy: Read complete after 10s [id=arn:aws:iam::586543333908:policy/app-udacity-instance-policy]
+module.project_eks.aws_iam_role_policy_attachment.node_harmony_policy_attachment: Refreshing state... [id=app-udacity-eks-node-role-20230108145322907500000002]
+module.project_eks.aws_eks_node_group.node: Refreshing state... [id=udacity-cluster:app-udacity-node-group]
+kubernetes_namespace.udacity: Refreshing state... [id=udacity]
+kubernetes_namespace.monitoring: Refreshing state... [id=monitoring]
+kubernetes_service.grafana-external: Refreshing state... [id=monitoring/grafana-external]
+
+Note: Objects have changed outside of Terraform
+
+Terraform detected the following changes made outside of Terraform since the last "terraform apply" which may have affected this plan:
+
+  # module.project_ec2.aws_instance.ubuntu[0] has changed
+  ~ resource "aws_instance" "ubuntu" {
+      ~ associate_public_ip_address          = true -> false
+        id                                   = "i-03c8df69ae0577b73"
+      ~ instance_state                       = "running" -> "stopped"
+      - public_dns                           = "ec2-18-144-177-7.us-west-1.compute.amazonaws.com" -> null
+      - public_ip                            = "18.144.177.7" -> null
+        tags                                 = {
+            "Name" = "Ubuntu-Web"
+        }
+        # (27 unchanged attributes hidden)
+
+        # (7 unchanged blocks hidden)
+    }
+
+  # module.project_ec2.aws_instance.ubuntu[1] has been deleted
+  - resource "aws_instance" "ubuntu" {
+      - ami                         = "ami-025a4679e58037845" -> null
+      - get_password_data           = false -> null
+      - id                          = "i-0e9064a109f9fb1fa" -> null
+      - instance_type               = "t3.micro" -> null
+      - key_name                    = "udacity" -> null
+      - secondary_private_ips       = [] -> null
+      - security_groups             = [] -> null
+      - source_dest_check           = true -> null
+      - subnet_id                   = "subnet-0ab8918fde193be27" -> null
+      - tags                        = {
+          - "Name" = "Ubuntu-Web"
+        } -> null
+      - tags_all                    = {
+          - "Name"      = "Ubuntu-Web"
+          - "Terraform" = "true"
+        } -> null
+      - user_data_replace_on_change = false -> null
+      - vpc_security_group_ids      = [
+          - "sg-072eaecba4054431d",
+        ] -> null
+    }
+
+  # module.project_ec2.aws_instance.ubuntu[2] has been deleted
+  - resource "aws_instance" "ubuntu" {
+      - ami                         = "ami-025a4679e58037845" -> null
+      - get_password_data           = false -> null
+      - id                          = "i-07466f570c44896bb" -> null
+      - instance_type               = "t3.micro" -> null
+      - key_name                    = "udacity" -> null
+      - secondary_private_ips       = [] -> null
+      - security_groups             = [] -> null
+      - source_dest_check           = true -> null
+      - subnet_id                   = "subnet-0ab8918fde193be27" -> null
+      - tags                        = {
+          - "Name" = "Ubuntu-Web"
+        } -> null
+      - tags_all                    = {
+          - "Name"      = "Ubuntu-Web"
+          - "Terraform" = "true"
+        } -> null
+      - user_data_replace_on_change = false -> null
+      - vpc_security_group_ids      = [
+          - "sg-072eaecba4054431d",
+        ] -> null
+    }
+
+
+Unless you have made equivalent changes to your configuration, or ignored the relevant attributes using ignore_changes, the following plan may include actions to undo or respond to these changes.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # module.project_alb.aws_lb_target_group_attachment.udacity[0] will be created
+  + resource "aws_lb_target_group_attachment" "udacity" {
+      + id               = (known after apply)
+      + port             = 80
+      + target_group_arn = "arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3"
+      + target_id        = "i-03c8df69ae0577b73"
+    }
+
+  # module.project_alb.aws_lb_target_group_attachment.udacity[1] will be created
+  + resource "aws_lb_target_group_attachment" "udacity" {
+      + id               = (known after apply)
+      + port             = 80
+      + target_group_arn = "arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3"
+      + target_id        = (known after apply)
+    }
+
+  # module.project_alb.aws_lb_target_group_attachment.udacity[2] will be created
+  + resource "aws_lb_target_group_attachment" "udacity" {
+      + id               = (known after apply)
+      + port             = 80
+      + target_group_arn = "arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3"
+      + target_id        = (known after apply)
+    }
+
+  # module.project_ec2.aws_instance.ubuntu[1] will be created
+  + resource "aws_instance" "ubuntu" {
+      + ami                                  = "ami-025a4679e58037845"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = (known after apply)
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t3.micro"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "udacity"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + subnet_id                            = "subnet-0ab8918fde193be27"
+      + tags                                 = {
+          + "Name" = "Ubuntu-Web"
+        }
+      + tags_all                             = {
+          + "Name"      = "Ubuntu-Web"
+          + "Terraform" = "true"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + vpc_security_group_ids               = [
+          + "sg-072eaecba4054431d",
+        ]
+
+      + capacity_reservation_specification {
+          + capacity_reservation_preference = (known after apply)
+
+          + capacity_reservation_target {
+              + capacity_reservation_id                 = (known after apply)
+              + capacity_reservation_resource_group_arn = (known after apply)
+            }
+        }
+
+      + ebs_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + snapshot_id           = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+
+      + enclave_options {
+          + enabled = (known after apply)
+        }
+
+      + ephemeral_block_device {
+          + device_name  = (known after apply)
+          + no_device    = (known after apply)
+          + virtual_name = (known after apply)
+        }
+
+      + maintenance_options {
+          + auto_recovery = (known after apply)
+        }
+
+      + metadata_options {
+          + http_endpoint               = (known after apply)
+          + http_put_response_hop_limit = (known after apply)
+          + http_tokens                 = (known after apply)
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface {
+          + delete_on_termination = (known after apply)
+          + device_index          = (known after apply)
+          + network_card_index    = (known after apply)
+          + network_interface_id  = (known after apply)
+        }
+
+      + private_dns_name_options {
+          + enable_resource_name_dns_a_record    = (known after apply)
+          + enable_resource_name_dns_aaaa_record = (known after apply)
+          + hostname_type                        = (known after apply)
+        }
+
+      + root_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+    }
+
+  # module.project_ec2.aws_instance.ubuntu[2] will be created
+  + resource "aws_instance" "ubuntu" {
+      + ami                                  = "ami-025a4679e58037845"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = (known after apply)
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t3.micro"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "udacity"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + subnet_id                            = "subnet-0ab8918fde193be27"
+      + tags                                 = {
+          + "Name" = "Ubuntu-Web"
+        }
+      + tags_all                             = {
+          + "Name"      = "Ubuntu-Web"
+          + "Terraform" = "true"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + vpc_security_group_ids               = [
+          + "sg-072eaecba4054431d",
+        ]
+
+      + capacity_reservation_specification {
+          + capacity_reservation_preference = (known after apply)
+
+          + capacity_reservation_target {
+              + capacity_reservation_id                 = (known after apply)
+              + capacity_reservation_resource_group_arn = (known after apply)
+            }
+        }
+
+      + ebs_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + snapshot_id           = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+
+      + enclave_options {
+          + enabled = (known after apply)
+        }
+
+      + ephemeral_block_device {
+          + device_name  = (known after apply)
+          + no_device    = (known after apply)
+          + virtual_name = (known after apply)
+        }
+
+      + maintenance_options {
+          + auto_recovery = (known after apply)
+        }
+
+      + metadata_options {
+          + http_endpoint               = (known after apply)
+          + http_put_response_hop_limit = (known after apply)
+          + http_tokens                 = (known after apply)
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface {
+          + delete_on_termination = (known after apply)
+          + device_index          = (known after apply)
+          + network_card_index    = (known after apply)
+          + network_interface_id  = (known after apply)
+        }
+
+      + private_dns_name_options {
+          + enable_resource_name_dns_a_record    = (known after apply)
+          + enable_resource_name_dns_aaaa_record = (known after apply)
+          + hostname_type                        = (known after apply)
+        }
+
+      + root_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+    }
+
+Plan: 5 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+module.project_ec2.aws_instance.ubuntu[1]: Creating...
+module.project_ec2.aws_instance.ubuntu[2]: Creating...
+module.project_ec2.aws_instance.ubuntu[1]: Still creating... [10s elapsed]
+module.project_ec2.aws_instance.ubuntu[2]: Still creating... [10s elapsed]
+module.project_ec2.aws_instance.ubuntu[2]: Creation complete after 16s [id=i-0e711c3f588fa151d]
+module.project_ec2.aws_instance.ubuntu[1]: Creation complete after 16s [id=i-00d8855b7733942ba]
+module.project_alb.aws_lb_target_group_attachment.udacity[1]: Creating...
+module.project_alb.aws_lb_target_group_attachment.udacity[2]: Creating...
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Creating...
+module.project_alb.aws_lb_target_group_attachment.udacity[1]: Creation complete after 1s [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3-20230108150825258200000003]
+module.project_alb.aws_lb_target_group_attachment.udacity[2]: Creation complete after 1s [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3-20230108150825337400000004]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m50s elapsed]
+╷
+│ Error: Error registering targets with target group: Error attaching instance to LB, retrying: InvalidTarget: The following targets are not in a running state and cannot be registered: 'i-03c8df69ae0577b73'
+│ 	status code: 400, request id: 80c3f1df-59ae-495e-b631-fa7be3f5f110
+│
+│   with module.project_alb.aws_lb_target_group_attachment.udacity[0],
+│   on modules/alb/alb.tf line 8, in resource "aws_lb_target_group_attachment" "udacity":
+│    8: resource "aws_lb_target_group_attachment" "udacity" {
+│
+╵
+matrxi@ubuntu:~/Documents/Planning-for-High-Availability-and-Incident-Response/project/starter-code/zone2$ terraform apply
+data.terraform_remote_state.vpc: Reading...
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly: Refreshing state... [id=app-udacity-eks-node-role-20230108145323009800000007]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSServicePolicy: Refreshing state... [id=app-udacity-eks-cluster-role-20230108145323512700000008]
+data.aws_iam_policy.instance-policy: Reading...
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322971200000006]
+module.project_eks.aws_iam_role_policy_attachment.node_CloudWatchAgentServerPolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322960300000005]
+data.aws_iam_role.eks_cluster_role: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_assume_role_policy: Reading...
+data.aws_ami.amazon_linux_2: Reading...
+data.aws_caller_identity.current: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_assume_role_policy: Read complete after 0s [id=189502314]
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322898300000001]
+data.aws_iam_role.eks_cluster_role: Read complete after 1s [id=app-udacity-eks-cluster-role]
+data.aws_iam_role.eks_node_role: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_node_assume_role_policy: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_node_assume_role_policy: Read complete after 0s [id=1903849331]
+data.aws_iam_policy.cloudwatch-policy: Reading...
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy: Refreshing state... [id=app-udacity-eks-cluster-role-20230108145322928700000003]
+data.aws_caller_identity.current: Read complete after 1s [id=586543333908]
+data.aws_iam_role.eks_node_role: Read complete after 0s [id=app-udacity-eks-node-role]
+data.aws_ami.amazon_linux_2: Read complete after 1s [id=ami-0fc161d91b03576d0]
+data.terraform_remote_state.vpc: Read complete after 4s
+module.project_alb.aws_lb_target_group.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3]
+module.project_eks.aws_security_group.eks-cluster: Refreshing state... [id=sg-0f275857de95ba384]
+module.project_ec2.aws_security_group.ec2_sg: Refreshing state... [id=sg-072eaecba4054431d]
+module.project_eks.aws_eks_cluster.cluster: Refreshing state... [id=udacity-cluster]
+module.project_ec2.aws_instance.ubuntu[0]: Refreshing state... [id=i-03c8df69ae0577b73]
+module.project_ec2.aws_instance.ubuntu[1]: Refreshing state... [id=i-00d8855b7733942ba]
+module.project_alb.aws_lb.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:loadbalancer/app/udacity-lb-tf/808f513cc213f28a]
+module.project_ec2.aws_instance.ubuntu[2]: Refreshing state... [id=i-0e711c3f588fa151d]
+data.aws_eks_cluster_auth.cluster: Reading...
+data.aws_eks_cluster.cluster: Reading...
+data.aws_eks_cluster_auth.cluster: Read complete after 0s [id=udacity-cluster]
+module.project_alb.aws_lb_listener.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:listener/app/udacity-lb-tf/808f513cc213f28a/4bfcfeb42ec18f45]
+data.aws_eks_cluster.cluster: Read complete after 0s [id=udacity-cluster]
+data.aws_iam_policy.cloudwatch-policy: Read complete after 3s [id=arn:aws:iam::586543333908:policy/app-udacity-eks-cluster-role-cloudwatch-policy]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSCloudwatchPolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322929600000004]
+module.project_alb.aws_lb_target_group_attachment.udacity[2]: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3-20230108150825337400000004]
+module.project_alb.aws_lb_target_group_attachment.udacity[1]: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3-20230108150825258200000003]
+data.aws_iam_policy.instance-policy: Read complete after 9s [id=arn:aws:iam::586543333908:policy/app-udacity-instance-policy]
+module.project_eks.aws_iam_role_policy_attachment.node_harmony_policy_attachment: Refreshing state... [id=app-udacity-eks-node-role-20230108145322907500000002]
+module.project_eks.aws_eks_node_group.node: Refreshing state... [id=udacity-cluster:app-udacity-node-group]
+kubernetes_namespace.monitoring: Refreshing state... [id=monitoring]
+kubernetes_namespace.udacity: Refreshing state... [id=udacity]
+kubernetes_service.grafana-external: Refreshing state... [id=monitoring/grafana-external]
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # module.project_alb.aws_lb_target_group_attachment.udacity[0] will be created
+  + resource "aws_lb_target_group_attachment" "udacity" {
+      + id               = (known after apply)
+      + port             = 80
+      + target_group_arn = "arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3"
+      + target_id        = "i-03c8df69ae0577b73"
+    }
+
+Plan: 1 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Creating...
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [1m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [2m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [3m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [4m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [5m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [6m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [7m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [8m50s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m0s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m10s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m20s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m30s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m40s elapsed]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Still creating... [9m50s elapsed]
+╷
+│ Error: Error registering targets with target group: Error attaching instance to LB, retrying: InvalidTarget: The following targets are not in a running state and cannot be registered: 'i-03c8df69ae0577b73'
+│ 	status code: 400, request id: 5417e528-dd74-4f14-bc01-d572ad9cf5d9
+│
+│   with module.project_alb.aws_lb_target_group_attachment.udacity[0],
+│   on modules/alb/alb.tf line 8, in resource "aws_lb_target_group_attachment" "udacity":
+│    8: resource "aws_lb_target_group_attachment" "udacity" {
+│
+╵
+matrxi@ubuntu:~/Documents/Planning-for-High-Availability-and-Incident-Response/project/starter-code/zone2$ terraform apply
+data.terraform_remote_state.vpc: Reading...
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322971200000006]
+module.project_eks.data.aws_iam_policy_document.eks_node_assume_role_policy: Reading...
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322898300000001]
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly: Refreshing state... [id=app-udacity-eks-node-role-20230108145323009800000007]
+module.project_eks.aws_iam_role_policy_attachment.node_CloudWatchAgentServerPolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322960300000005]
+module.project_eks.data.aws_iam_policy_document.eks_assume_role_policy: Reading...
+data.aws_iam_policy.cloudwatch-policy: Reading...
+data.aws_iam_role.eks_node_role: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_assume_role_policy: Read complete after 0s [id=189502314]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSServicePolicy: Refreshing state... [id=app-udacity-eks-cluster-role-20230108145323512700000008]
+data.aws_iam_role.eks_cluster_role: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_node_assume_role_policy: Read complete after 0s [id=1903849331]
+data.aws_iam_policy.instance-policy: Reading...
+data.aws_iam_role.eks_node_role: Read complete after 1s [id=app-udacity-eks-node-role]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy: Refreshing state... [id=app-udacity-eks-cluster-role-20230108145322928700000003]
+data.aws_iam_role.eks_cluster_role: Read complete after 1s [id=app-udacity-eks-cluster-role]
+data.aws_caller_identity.current: Reading...
+data.aws_ami.amazon_linux_2: Reading...
+data.aws_caller_identity.current: Read complete after 1s [id=586543333908]
+data.aws_ami.amazon_linux_2: Read complete after 2s [id=ami-0fc161d91b03576d0]
+data.terraform_remote_state.vpc: Still reading... [10s elapsed]
+data.aws_iam_policy.cloudwatch-policy: Still reading... [10s elapsed]
+data.aws_iam_policy.instance-policy: Still reading... [10s elapsed]
+data.aws_iam_policy.instance-policy: Read complete after 10s [id=arn:aws:iam::586543333908:policy/app-udacity-instance-policy]
+module.project_eks.aws_iam_role_policy_attachment.node_harmony_policy_attachment: Refreshing state... [id=app-udacity-eks-node-role-20230108145322907500000002]
+data.aws_iam_policy.cloudwatch-policy: Read complete after 11s [id=arn:aws:iam::586543333908:policy/app-udacity-eks-cluster-role-cloudwatch-policy]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSCloudwatchPolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322929600000004]
+data.terraform_remote_state.vpc: Read complete after 15s
+module.project_ec2.aws_security_group.ec2_sg: Refreshing state... [id=sg-072eaecba4054431d]
+module.project_eks.aws_security_group.eks-cluster: Refreshing state... [id=sg-0f275857de95ba384]
+module.project_alb.aws_lb_target_group.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3]
+module.project_alb.aws_lb.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:loadbalancer/app/udacity-lb-tf/808f513cc213f28a]
+module.project_ec2.aws_instance.ubuntu[1]: Refreshing state... [id=i-00d8855b7733942ba]
+module.project_ec2.aws_instance.ubuntu[2]: Refreshing state... [id=i-0e711c3f588fa151d]
+module.project_ec2.aws_instance.ubuntu[0]: Refreshing state... [id=i-03c8df69ae0577b73]
+module.project_eks.aws_eks_cluster.cluster: Refreshing state... [id=udacity-cluster]
+module.project_alb.aws_lb_listener.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:listener/app/udacity-lb-tf/808f513cc213f28a/4bfcfeb42ec18f45]
+data.aws_eks_cluster_auth.cluster: Reading...
+module.project_eks.aws_eks_node_group.node: Refreshing state... [id=udacity-cluster:app-udacity-node-group]
+data.aws_eks_cluster.cluster: Reading...
+data.aws_eks_cluster_auth.cluster: Read complete after 0s [id=udacity-cluster]
+data.aws_eks_cluster.cluster: Read complete after 1s [id=udacity-cluster]
+kubernetes_namespace.udacity: Refreshing state... [id=udacity]
+kubernetes_namespace.monitoring: Refreshing state... [id=monitoring]
+module.project_alb.aws_lb_target_group_attachment.udacity[1]: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3-20230108150825258200000003]
+module.project_alb.aws_lb_target_group_attachment.udacity[2]: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3-20230108150825337400000004]
+kubernetes_service.grafana-external: Refreshing state... [id=monitoring/grafana-external]
+
+Note: Objects have changed outside of Terraform
+
+Terraform detected the following changes made outside of Terraform since the last "terraform apply" which may have affected this plan:
+
+  # module.project_ec2.aws_instance.ubuntu[0] has been deleted
+  - resource "aws_instance" "ubuntu" {
+      - ami                                  = "ami-025a4679e58037845" -> null
+      - arn                                  = "arn:aws:ec2:us-west-1:586543333908:instance/i-03c8df69ae0577b73" -> null
+      - associate_public_ip_address          = false -> null
+      - availability_zone                    = "us-west-1b" -> null
+      - cpu_core_count                       = 1 -> null
+      - cpu_threads_per_core                 = 2 -> null
+      - disable_api_stop                     = false -> null
+      - disable_api_termination              = false -> null
+      - ebs_optimized                        = false -> null
+      - get_password_data                    = false -> null
+      - hibernation                          = false -> null
+      - id                                   = "i-03c8df69ae0577b73" -> null
+      - instance_initiated_shutdown_behavior = "stop" -> null
+      - instance_state                       = "stopped" -> null
+      - instance_type                        = "t3.micro" -> null
+      - ipv6_address_count                   = 0 -> null
+      - ipv6_addresses                       = [] -> null
+      - key_name                             = "udacity" -> null
+      - monitoring                           = false -> null
+      - primary_network_interface_id         = "eni-0019122273d2e304d" -> null
+      - private_dns                          = "ip-10-100-10-195.us-west-1.compute.internal" -> null
+      - private_ip                           = "10.100.10.195" -> null
+      - secondary_private_ips                = [] -> null
+      - security_groups                      = [] -> null
+      - source_dest_check                    = true -> null
+      - subnet_id                            = "subnet-0ab8918fde193be27" -> null
+      - tags                                 = {
+          - "Name" = "Ubuntu-Web"
+        } -> null
+      - tags_all                             = {
+          - "Name"      = "Ubuntu-Web"
+          - "Terraform" = "true"
+        } -> null
+      - tenancy                              = "default" -> null
+      - user_data_replace_on_change          = false -> null
+      - vpc_security_group_ids               = [
+          - "sg-072eaecba4054431d",
+        ] -> null
+
+      - capacity_reservation_specification {
+          - capacity_reservation_preference = "open" -> null
+        }
+
+      - credit_specification {
+          - cpu_credits = "unlimited" -> null
+        }
+
+      - enclave_options {
+          - enabled = false -> null
+        }
+
+      - maintenance_options {
+          - auto_recovery = "default" -> null
+        }
+
+      - metadata_options {
+          - http_endpoint               = "enabled" -> null
+          - http_put_response_hop_limit = 1 -> null
+          - http_tokens                 = "optional" -> null
+          - instance_metadata_tags      = "disabled" -> null
+        }
+
+      - private_dns_name_options {
+          - enable_resource_name_dns_a_record    = false -> null
+          - enable_resource_name_dns_aaaa_record = false -> null
+          - hostname_type                        = "ip-name" -> null
+        }
+
+      - root_block_device {
+          - delete_on_termination = true -> null
+          - device_name           = "/dev/sda1" -> null
+          - encrypted             = false -> null
+          - iops                  = 100 -> null
+          - tags                  = {} -> null
+          - throughput            = 0 -> null
+          - volume_id             = "vol-05ca52443c30bf6f2" -> null
+          - volume_size           = 8 -> null
+          - volume_type           = "gp2" -> null
+        }
+    }
+
+
+Unless you have made equivalent changes to your configuration, or ignored the relevant attributes using ignore_changes, the following plan may include actions to undo or respond to these changes.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+
+Terraform will perform the following actions:
+
+  # module.project_alb.aws_lb_target_group_attachment.udacity[0] will be created
+  + resource "aws_lb_target_group_attachment" "udacity" {
+      + id               = (known after apply)
+      + port             = 80
+      + target_group_arn = "arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3"
+      + target_id        = (known after apply)
+    }
+
+  # module.project_ec2.aws_instance.ubuntu[0] will be created
+  + resource "aws_instance" "ubuntu" {
+      + ami                                  = "ami-025a4679e58037845"
+      + arn                                  = (known after apply)
+      + associate_public_ip_address          = (known after apply)
+      + availability_zone                    = (known after apply)
+      + cpu_core_count                       = (known after apply)
+      + cpu_threads_per_core                 = (known after apply)
+      + disable_api_stop                     = (known after apply)
+      + disable_api_termination              = (known after apply)
+      + ebs_optimized                        = (known after apply)
+      + get_password_data                    = false
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      + id                                   = (known after apply)
+      + instance_initiated_shutdown_behavior = (known after apply)
+      + instance_state                       = (known after apply)
+      + instance_type                        = "t3.micro"
+      + ipv6_address_count                   = (known after apply)
+      + ipv6_addresses                       = (known after apply)
+      + key_name                             = "udacity"
+      + monitoring                           = (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      + primary_network_interface_id         = (known after apply)
+      + private_dns                          = (known after apply)
+      + private_ip                           = (known after apply)
+      + public_dns                           = (known after apply)
+      + public_ip                            = (known after apply)
+      + secondary_private_ips                = (known after apply)
+      + security_groups                      = (known after apply)
+      + source_dest_check                    = true
+      + subnet_id                            = "subnet-0ab8918fde193be27"
+      + tags                                 = {
+          + "Name" = "Ubuntu-Web"
+        }
+      + tags_all                             = {
+          + "Name"      = "Ubuntu-Web"
+          + "Terraform" = "true"
+        }
+      + tenancy                              = (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+      + user_data_replace_on_change          = false
+      + vpc_security_group_ids               = [
+          + "sg-072eaecba4054431d",
+        ]
+
+      + capacity_reservation_specification {
+          + capacity_reservation_preference = (known after apply)
+
+          + capacity_reservation_target {
+              + capacity_reservation_id                 = (known after apply)
+              + capacity_reservation_resource_group_arn = (known after apply)
+            }
+        }
+
+      + ebs_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + snapshot_id           = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+
+      + enclave_options {
+          + enabled = (known after apply)
+        }
+
+      + ephemeral_block_device {
+          + device_name  = (known after apply)
+          + no_device    = (known after apply)
+          + virtual_name = (known after apply)
+        }
+
+      + maintenance_options {
+          + auto_recovery = (known after apply)
+        }
+
+      + metadata_options {
+          + http_endpoint               = (known after apply)
+          + http_put_response_hop_limit = (known after apply)
+          + http_tokens                 = (known after apply)
+          + instance_metadata_tags      = (known after apply)
+        }
+
+      + network_interface {
+          + delete_on_termination = (known after apply)
+          + device_index          = (known after apply)
+          + network_card_index    = (known after apply)
+          + network_interface_id  = (known after apply)
+        }
+
+      + private_dns_name_options {
+          + enable_resource_name_dns_a_record    = (known after apply)
+          + enable_resource_name_dns_aaaa_record = (known after apply)
+          + hostname_type                        = (known after apply)
+        }
+
+      + root_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+    }
+
+Plan: 2 to add, 0 to change, 0 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+module.project_ec2.aws_instance.ubuntu[0]: Creating...
+module.project_ec2.aws_instance.ubuntu[0]: Still creating... [10s elapsed]
+╷
+│ Error: waiting for EC2 Instance (i-064add1c795bb1c6e) create: unexpected state 'shutting-down', wanted target 'running'. last error: Client.UserInitiatedShutdown: User initiated shutdown
+│
+│   with module.project_ec2.aws_instance.ubuntu[0],
+│   on modules/ec2/ec2.tf line 10, in resource "aws_instance" "ubuntu":
+│   10: resource "aws_instance" "ubuntu" {
+│
+╵
+matrxi@ubuntu:~/Documents/Planning-for-High-Availability-and-Incident-Response/project/starter-code/zone2$ terraform apply
+data.terraform_remote_state.vpc: Reading...
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSClusterPolicy: Refreshing state... [id=app-udacity-eks-cluster-role-20230108145322928700000003]
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKSWorkerNodePolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322971200000006]
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEKS_CNI_Policy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322898300000001]
+module.project_eks.aws_iam_role_policy_attachment.node_CloudWatchAgentServerPolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322960300000005]
+module.project_eks.data.aws_iam_policy_document.eks_assume_role_policy: Reading...
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSServicePolicy: Refreshing state... [id=app-udacity-eks-cluster-role-20230108145323512700000008]
+data.aws_iam_role.eks_cluster_role: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_node_assume_role_policy: Reading...
+data.aws_iam_role.eks_node_role: Reading...
+module.project_eks.data.aws_iam_policy_document.eks_assume_role_policy: Read complete after 0s [id=189502314]
+module.project_eks.aws_iam_role_policy_attachment.node_AmazonEC2ContainerRegistryReadOnly: Refreshing state... [id=app-udacity-eks-node-role-20230108145323009800000007]
+module.project_eks.data.aws_iam_policy_document.eks_node_assume_role_policy: Read complete after 0s [id=1903849331]
+data.aws_ami.amazon_linux_2: Reading...
+data.aws_iam_policy.instance-policy: Reading...
+data.aws_caller_identity.current: Reading...
+data.aws_iam_policy.cloudwatch-policy: Reading...
+data.aws_iam_role.eks_cluster_role: Read complete after 1s [id=app-udacity-eks-cluster-role]
+data.aws_iam_role.eks_node_role: Read complete after 1s [id=app-udacity-eks-node-role]
+data.aws_ami.amazon_linux_2: Read complete after 1s [id=ami-0fc161d91b03576d0]
+data.terraform_remote_state.vpc: Read complete after 4s
+module.project_alb.aws_lb_target_group.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3]
+module.project_eks.aws_security_group.eks-cluster: Refreshing state... [id=sg-0f275857de95ba384]
+module.project_ec2.aws_security_group.ec2_sg: Refreshing state... [id=sg-072eaecba4054431d]
+data.aws_caller_identity.current: Read complete after 1s [id=586543333908]
+module.project_eks.aws_eks_cluster.cluster: Refreshing state... [id=udacity-cluster]
+module.project_alb.aws_lb.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:loadbalancer/app/udacity-lb-tf/808f513cc213f28a]
+module.project_ec2.aws_instance.ubuntu[0]: Refreshing state... [id=i-064add1c795bb1c6e]
+module.project_ec2.aws_instance.ubuntu[1]: Refreshing state... [id=i-00d8855b7733942ba]
+module.project_ec2.aws_instance.ubuntu[2]: Refreshing state... [id=i-0e711c3f588fa151d]
+data.aws_eks_cluster.cluster: Reading...
+data.aws_eks_cluster_auth.cluster: Reading...
+data.aws_eks_cluster_auth.cluster: Read complete after 0s [id=udacity-cluster]
+data.aws_eks_cluster.cluster: Read complete after 1s [id=udacity-cluster]
+module.project_alb.aws_lb_listener.udacity: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:listener/app/udacity-lb-tf/808f513cc213f28a/4bfcfeb42ec18f45]
+module.project_alb.aws_lb_target_group_attachment.udacity[2]: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3-20230108150825337400000004]
+module.project_alb.aws_lb_target_group_attachment.udacity[1]: Refreshing state... [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3-20230108150825258200000003]
+data.aws_iam_policy.instance-policy: Read complete after 9s [id=arn:aws:iam::586543333908:policy/app-udacity-instance-policy]
+module.project_eks.aws_iam_role_policy_attachment.node_harmony_policy_attachment: Refreshing state... [id=app-udacity-eks-node-role-20230108145322907500000002]
+data.aws_iam_policy.cloudwatch-policy: Read complete after 9s [id=arn:aws:iam::586543333908:policy/app-udacity-eks-cluster-role-cloudwatch-policy]
+module.project_eks.aws_iam_role_policy_attachment.cluster_AmazonEKSCloudwatchPolicy: Refreshing state... [id=app-udacity-eks-node-role-20230108145322929600000004]
+module.project_eks.aws_eks_node_group.node: Refreshing state... [id=udacity-cluster:app-udacity-node-group]
+kubernetes_namespace.monitoring: Refreshing state... [id=monitoring]
+kubernetes_namespace.udacity: Refreshing state... [id=udacity]
+kubernetes_service.grafana-external: Refreshing state... [id=monitoring/grafana-external]
+
+Note: Objects have changed outside of Terraform
+
+Terraform detected the following changes made outside of Terraform since the last "terraform apply" which may have affected this plan:
+
+  # module.project_ec2.aws_instance.ubuntu[0] has changed
+  ~ resource "aws_instance" "ubuntu" {
+      + arn                                  = "arn:aws:ec2:us-west-1:586543333908:instance/i-064add1c795bb1c6e"
+      + associate_public_ip_address          = true
+      + availability_zone                    = "us-west-1b"
+      + cpu_core_count                       = 1
+      + cpu_threads_per_core                 = 2
+      + disable_api_stop                     = false
+      + disable_api_termination              = false
+      + ebs_optimized                        = false
+      + hibernation                          = false
+        id                                   = "i-064add1c795bb1c6e"
+      + instance_initiated_shutdown_behavior = "stop"
+      + instance_state                       = "shutting-down"
+      + ipv6_address_count                   = 0
+      + ipv6_addresses                       = []
+      + monitoring                           = false
+      + primary_network_interface_id         = "eni-08686cf8ca626bacd"
+      + private_dns                          = "ip-10-100-10-158.us-west-1.compute.internal"
+      + private_ip                           = "10.100.10.158"
+      + public_dns                           = "ec2-52-53-251-195.us-west-1.compute.amazonaws.com"
+      + public_ip                            = "52.53.251.195"
+        tags                                 = {
+            "Name" = "Ubuntu-Web"
+        }
+      + tenancy                              = "default"
+        # (11 unchanged attributes hidden)
+
+      + capacity_reservation_specification {
+          + capacity_reservation_preference = "open"
+        }
+
+      + credit_specification {
+          + cpu_credits = "unlimited"
+        }
+
+      + enclave_options {
+          + enabled = false
+        }
+
+      + maintenance_options {
+          + auto_recovery = "default"
+        }
+
+      + metadata_options {
+          + http_endpoint               = "enabled"
+          + http_put_response_hop_limit = 1
+          + http_tokens                 = "optional"
+          + instance_metadata_tags      = "disabled"
+        }
+
+      + private_dns_name_options {
+          + enable_resource_name_dns_a_record    = false
+          + enable_resource_name_dns_aaaa_record = false
+          + hostname_type                        = "ip-name"
+        }
+
+      + root_block_device {
+          + delete_on_termination = true
+          + device_name           = "/dev/sda1"
+          + encrypted             = false
+          + iops                  = 100
+          + tags                  = {}
+          + throughput            = 0
+          + volume_id             = "vol-0eb7f0dd8978d6ab5"
+          + volume_size           = 8
+          + volume_type           = "gp2"
+        }
+    }
+
+  # module.project_ec2.aws_instance.ubuntu[1] has changed
+  ~ resource "aws_instance" "ubuntu" {
+      ~ associate_public_ip_address          = true -> false
+        id                                   = "i-00d8855b7733942ba"
+      ~ instance_state                       = "running" -> "stopped"
+      - public_dns                           = "ec2-54-183-211-62.us-west-1.compute.amazonaws.com" -> null
+      - public_ip                            = "54.183.211.62" -> null
+        tags                                 = {
+            "Name" = "Ubuntu-Web"
+        }
+        # (27 unchanged attributes hidden)
+
+        # (7 unchanged blocks hidden)
+    }
+
+
+Unless you have made equivalent changes to your configuration, or ignored the relevant attributes using ignore_changes, the following plan may include actions to undo or respond to these changes.
+
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+
+Terraform used the selected providers to generate the following execution plan. Resource actions are indicated with the following symbols:
+  + create
+-/+ destroy and then create replacement
+
+Terraform will perform the following actions:
+
+  # module.project_alb.aws_lb_target_group_attachment.udacity[0] will be created
+  + resource "aws_lb_target_group_attachment" "udacity" {
+      + id               = (known after apply)
+      + port             = 80
+      + target_group_arn = "arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3"
+      + target_id        = (known after apply)
+    }
+
+  # module.project_ec2.aws_instance.ubuntu[0] is tainted, so must be replaced
+-/+ resource "aws_instance" "ubuntu" {
+      ~ arn                                  = "arn:aws:ec2:us-west-1:586543333908:instance/i-064add1c795bb1c6e" -> (known after apply)
+      ~ associate_public_ip_address          = true -> (known after apply)
+      ~ availability_zone                    = "us-west-1b" -> (known after apply)
+      ~ cpu_core_count                       = 1 -> (known after apply)
+      ~ cpu_threads_per_core                 = 2 -> (known after apply)
+      ~ disable_api_stop                     = false -> (known after apply)
+      ~ disable_api_termination              = false -> (known after apply)
+      ~ ebs_optimized                        = false -> (known after apply)
+      - hibernation                          = false -> null
+      + host_id                              = (known after apply)
+      + host_resource_group_arn              = (known after apply)
+      + iam_instance_profile                 = (known after apply)
+      ~ id                                   = "i-064add1c795bb1c6e" -> (known after apply)
+      ~ instance_initiated_shutdown_behavior = "stop" -> (known after apply)
+      ~ instance_state                       = "shutting-down" -> (known after apply)
+      ~ ipv6_address_count                   = 0 -> (known after apply)
+      ~ ipv6_addresses                       = [] -> (known after apply)
+      ~ monitoring                           = false -> (known after apply)
+      + outpost_arn                          = (known after apply)
+      + password_data                        = (known after apply)
+      + placement_group                      = (known after apply)
+      + placement_partition_number           = (known after apply)
+      ~ primary_network_interface_id         = "eni-08686cf8ca626bacd" -> (known after apply)
+      ~ private_dns                          = "ip-10-100-10-158.us-west-1.compute.internal" -> (known after apply)
+      ~ private_ip                           = "10.100.10.158" -> (known after apply)
+      ~ public_dns                           = "ec2-52-53-251-195.us-west-1.compute.amazonaws.com" -> (known after apply)
+      ~ public_ip                            = "52.53.251.195" -> (known after apply)
+      ~ secondary_private_ips                = [] -> (known after apply)
+      ~ security_groups                      = [] -> (known after apply)
+        tags                                 = {
+            "Name" = "Ubuntu-Web"
+        }
+      ~ tenancy                              = "default" -> (known after apply)
+      + user_data                            = (known after apply)
+      + user_data_base64                     = (known after apply)
+        # (9 unchanged attributes hidden)
+
+      ~ capacity_reservation_specification {
+          ~ capacity_reservation_preference = "open" -> (known after apply)
+
+          + capacity_reservation_target {
+              + capacity_reservation_id                 = (known after apply)
+              + capacity_reservation_resource_group_arn = (known after apply)
+            }
+        }
+
+      - credit_specification {
+          - cpu_credits = "unlimited" -> null
+        }
+
+      + ebs_block_device {
+          + delete_on_termination = (known after apply)
+          + device_name           = (known after apply)
+          + encrypted             = (known after apply)
+          + iops                  = (known after apply)
+          + kms_key_id            = (known after apply)
+          + snapshot_id           = (known after apply)
+          + tags                  = (known after apply)
+          + throughput            = (known after apply)
+          + volume_id             = (known after apply)
+          + volume_size           = (known after apply)
+          + volume_type           = (known after apply)
+        }
+
+      ~ enclave_options {
+          ~ enabled = false -> (known after apply)
+        }
+
+      + ephemeral_block_device {
+          + device_name  = (known after apply)
+          + no_device    = (known after apply)
+          + virtual_name = (known after apply)
+        }
+
+      ~ maintenance_options {
+          ~ auto_recovery = "default" -> (known after apply)
+        }
+
+      ~ metadata_options {
+          ~ http_endpoint               = "enabled" -> (known after apply)
+          ~ http_put_response_hop_limit = 1 -> (known after apply)
+          ~ http_tokens                 = "optional" -> (known after apply)
+          ~ instance_metadata_tags      = "disabled" -> (known after apply)
+        }
+
+      + network_interface {
+          + delete_on_termination = (known after apply)
+          + device_index          = (known after apply)
+          + network_card_index    = (known after apply)
+          + network_interface_id  = (known after apply)
+        }
+
+      ~ private_dns_name_options {
+          ~ enable_resource_name_dns_a_record    = false -> (known after apply)
+          ~ enable_resource_name_dns_aaaa_record = false -> (known after apply)
+          ~ hostname_type                        = "ip-name" -> (known after apply)
+        }
+
+      ~ root_block_device {
+          ~ delete_on_termination = true -> (known after apply)
+          ~ device_name           = "/dev/sda1" -> (known after apply)
+          ~ encrypted             = false -> (known after apply)
+          ~ iops                  = 100 -> (known after apply)
+          + kms_key_id            = (known after apply)
+          ~ tags                  = {} -> (known after apply)
+          ~ throughput            = 0 -> (known after apply)
+          ~ volume_id             = "vol-0eb7f0dd8978d6ab5" -> (known after apply)
+          ~ volume_size           = 8 -> (known after apply)
+          ~ volume_type           = "gp2" -> (known after apply)
+        }
+    }
+
+Plan: 2 to add, 0 to change, 1 to destroy.
+
+Do you want to perform these actions?
+  Terraform will perform the actions described above.
+  Only 'yes' will be accepted to approve.
+
+  Enter a value: yes
+
+module.project_ec2.aws_instance.ubuntu[0]: Destroying... [id=i-064add1c795bb1c6e]
+module.project_ec2.aws_instance.ubuntu[0]: Still destroying... [id=i-064add1c795bb1c6e, 10s elapsed]
+module.project_ec2.aws_instance.ubuntu[0]: Still destroying... [id=i-064add1c795bb1c6e, 20s elapsed]
+module.project_ec2.aws_instance.ubuntu[0]: Still destroying... [id=i-064add1c795bb1c6e, 30s elapsed]
+module.project_ec2.aws_instance.ubuntu[0]: Still destroying... [id=i-064add1c795bb1c6e, 40s elapsed]
+module.project_ec2.aws_instance.ubuntu[0]: Still destroying... [id=i-064add1c795bb1c6e, 50s elapsed]
+module.project_ec2.aws_instance.ubuntu[0]: Still destroying... [id=i-064add1c795bb1c6e, 1m0s elapsed]
+module.project_ec2.aws_instance.ubuntu[0]: Destruction complete after 1m4s
+module.project_ec2.aws_instance.ubuntu[0]: Creating...
+module.project_ec2.aws_instance.ubuntu[0]: Still creating... [10s elapsed]
+module.project_ec2.aws_instance.ubuntu[0]: Creation complete after 15s [id=i-01319b8777708e624]
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Creating...
+module.project_alb.aws_lb_target_group_attachment.udacity[0]: Creation complete after 2s [id=arn:aws:elasticloadbalancing:us-west-1:586543333908:targetgroup/udacity-lb-tg/8c774ac2d676b7a3-20230108153641564800000002]
+
+Apply complete! Resources: 2 added, 0 changed, 1 destroyed.
+
+Outputs:
+
+account_id = "586543333908"
+caller_arn = "arn:aws:iam::586543333908:user/matrxi"
+caller_user = "AIDAYREFVAIKEMTLJAQAK"
+matrxi@ubuntu:~/Documents/Planning-fo
