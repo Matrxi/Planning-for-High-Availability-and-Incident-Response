@@ -4,7 +4,7 @@
 Identify your zones here
 
 us-east-1 region availibility zones : ["us-east-2a","us-east-2b", "us-east-2c"]
-us-west-1 region availibility zones : ["us-west-1a", "us-west-1b"]
+us-west-1 region availibility zones : ["us-west-1b","us-west-1c"]
 
 
 ## Servers and Clusters
