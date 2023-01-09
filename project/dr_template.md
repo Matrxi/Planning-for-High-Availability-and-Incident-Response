@@ -4,7 +4,7 @@
 Identify your zones here
 
 us-east-1 region availibility zones : ["us-east-2a","us-east-2b", "us-east-2c"]
-us-west-1 region availibility zones : ["us-west-1b","us-west-1c"]
+us-west-1 region availibility zones : ["us-west-1b", "us-west-1c"]
 
 
 ## Servers and Clusters
@@ -34,9 +34,9 @@ Key pairs are used to access the EC2 instances.
 A logical subnet called Public Subnet allows access to and from the Internet through an Internet Gateway.
 Network address translation service is what NAT Gateway is.
 The public address of the NAT Gateway is represented by an elastic IP address (static IPv4 address).
-Requests are uniformly distributed among EC2 machines by the the load balancer.
 Database services include RDS Cluster.
 Virtual Private Cloud, or VPC, is a private cloud that is safe and separated within a larger AWS area.
+ALB -> Requests are uniformly distributed among EC2 machines by the load balancer.
 
 ## DR Plan
 ### Pre-Steps:
@@ -51,5 +51,5 @@ Resolve any errors related to mintoring namespace or IAM issue using the workaro
 ## Steps:
 You won't actually perform these steps, but write out what you would do to "fail-over" your application and database cluster to the other region. Think about all the pieces that were setup and how you would use those in the other region
 
-Change the DNS to Zone2 LB
+Use DNS Service (Amazon route 53) and change the LB IP point to DR zone2 LB (us-west-1)
 Stop RDS in zone1 -> it will make RDS of zone2 as primary and failover
